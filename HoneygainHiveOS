@@ -1,0 +1,107 @@
+
+Checar se já está instalado
+apt-get remove docker docker-engine docker.io containerd runc
+
+Repositório Principal
+apt-get update
+
+Instalar libs
+apt-get install ca-certificates curl gnupg lsb-release
+
+Chave Oficial Docker’s
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+Adicionar Repositório
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+Repositório Principal
+apt-get update 
+
+// Instalar Docker
+apt-get install docker-ce docker-ce-cli containerd.io
+
+// Testar docker
+docker run hello-world
+
+// Instalar image honeygain
+docker pull honeygain/honeygain
+
+// Iniciar serviço Honeygain
+docker run honeygain/honeygain -tou-get
+
+// Iniciar sua sessão
+screen docker run honeygain/honeygain -tou-accept -email EMAIL -pass SUA_SENHA -device NOME_DO_DISPOSITIVO
+
+
+---- Criar um arquivo para iniciar no boot : ------
+
+Criar um arquivo script
+nano honeygain.sh
+
+Colocar o seguinte texto
+screen docker run honeygain/honeygain -tou-accept -email EMAIL -pass SUA_SENHA -device NOME_DO_DISPOSITIVO
+
+Fazer arquivo executavel
+chmod +x honeygain.sh
+
+
+Ver as telas disponiveis no sistema
+screen -x
+
+Escolher a tela
+screen -r XXXXX
+
+A+D para mudar entre as screens
+
+------------
+
+*****rc.local******
+
+https://www.youtube.com/watch?v=-PuwXjyOYP0
+
+Inicial sistema rc-local
+sudo systemctl enable rc-local
+
+Checar o status do rc-local
+sudo systemctl status rc-local
+
+
+#Criar arquivo rc-local
+sudo nano /etc/systemd/system/rc-local.service
+
+Colar o seguinte no arquivo rc-local.service
+
+[Unit]
+Description=/etc/rc.local Compatibility
+ConditionPathExists=/etc/rc.local
+
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+StandardOutput=tty
+RemainAfterExit=yes
+SysVStartPriority=99
+
+[Install]
+WantedBy=multi-user.target
+
+
+#Criar script rc.local
+sudo nano /etc/rc.local
+
+Colar o seguinte dentro do arquivo rc.local
+#!/bin/bash
+
+screen -dm /honeygain.sh start
+
+exit 0
+
+#Dar permissão de execução
+sudo chmod +x /etc/rc.local
+
+sudo systemctl enable rc-local
+
+sudo systemctl start rc-local.service
+
+sudo systemctl status rc-local.service
